@@ -1,0 +1,44 @@
+{
+    "site_title": "SpeedNav Dashboard",
+    "announcement": "📢 System Notice: Domain list updated on 2025-11-27. Please press Ctrl+D to bookmark this page.",
+    "permanent_url": "https://www.google.com",
+    "contact_info": [
+        {
+            "label": "Telegram Group",
+            "url": "#",
+            "icon": "telegram"
+        },
+        {
+            "label": "Support Email",
+            "url": "mailto:admin@example.com",
+            "icon": "email"
+        },
+        {
+            "label": "Twitter",
+            "url": "#",
+            "icon": "twitter"
+        }
+    ],
+    "lines": [
+        {
+            "name": "Fast Line 01 (Google)",
+            "url": "https://www.google.com"
+        },
+        {
+            "name": "Fast Line 02 (Cloudflare)",
+            "url": "https://www.cloudflare.com"
+        },
+        {
+            "name": "Asia Optimized (Baidu)",
+            "url": "https://www.baidu.com"
+        },
+        {
+            "name": "Backup Line 01 (Bing)",
+            "url": "https://www.bing.com"
+        },
+        {
+            "name": "Dead Line (Test)",
+            "url": "https://www.this-domain-does-not-exist-12345.com"
+        }
+    ]
+}

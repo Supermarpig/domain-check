@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            850: '#1f2937',
+                            900: '#111827',
+                            950: '#0b0f19',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0f19; /* Deep dark background */
+        }
+        .glass-panel {
+            background: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="text-gray-100 font-sans antialiased min-h-screen flex flex-col items-center">
+
+    <!-- Main Container -->
+    <div id="app" class="w-full max-w-lg px-4 py-8 flex-grow flex flex-col space-y-6">
+        
+        <!-- Loading Skeleton -->
+        <div id="loading" class="flex flex-col items-center justify-center py-20 space-y-4">
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-gray-400 animate-pulse">Loading configuration...</p>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full py-6 text-center text-gray-500 text-xs">
+        <p>&copy; <span id="year"></span> <span id="footer-site-name">Dashboard</span>. All rights reserved.</p>
+        <p class="mt-2">Press <kbd class="bg-gray-800 px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 font-mono">Ctrl+D</kbd> to bookmark</p>
+    </footer>
+
+    <script>
+        // --- Icons (Simple SVG strings) ---
+        const ICONS = {
+            telegram: `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.743.025.956.956 0 0 0-.534.277l-8.8 8.8a.959.959 0 0 0 0 1.356l8.8 8.8a.959.959 0 0 0 1.356-1.356L4.66 12.959h16.38a.959.959 0 1 0 0-1.918H4.66l7.397-7.397a.959.959 0 0 0 0-1.356.959.959 0 0 0-.113-.288z" transform="scale(-1,1) translate(-24,0)"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-2.06-1.35-2.06-1.35s-.7-.48.02-1.13c.18-.16 3.32-3.04 3.38-3.16.01-.02.01-.09-.03-.13-.04-.04-.1-.03-.14 0-.06.05-2.26 1.44-6.4 4.23-.6.41-1.15.43-1.68.27-.6-.18-1.74-.56-1.74-.56s-.65-.26.44-.68c2.6-1.12 6.13-2.38 8.78-3.46 2.65-1.08 3.19-1.28 3.54-1.28.08 0 .25.02.36.11.09.08.12.19.13.27 0 .02.01.07 0 .12z"/></svg>`,
+            email: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>`,
+            twitter: `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>`,
+            default: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>`
+        };
+
+        // --- Main Logic ---
+        document.addEventListener('DOMContentLoaded', init);
+
+        async function init() {
+            const app = document.getElementById('app');
+            const yearSpan = document.getElementById('year');
+            yearSpan.textContent = new Date().getFullYear();
+
+            try {
+                const response = await fetch('./config.json');
+                if (!response.ok) throw new Error(`Config load failed: ${response.status}`);
+                const config = await response.json();
+                
+                renderDashboard(config);
+                startLatencyTests(config.lines);
+
+            } catch (error) {
+                console.error(error);
+                app.innerHTML = `
+                    <div class="glass-panel p-8 rounded-2xl text-center border-red-500/30 border">
+                        <div class="text-red-500 text-5xl mb-4">⚠️</div>
+                        <h1 class="text-2xl font-bold text-white mb-2">Configuration Error</h1>
+                        <p class="text-gray-400 mb-6">Unable to load the site configuration.</p>
+                        <button onclick="location.reload()" class="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderDashboard(config) {
+            const app = document.getElementById('app');
+            document.title = config.site_title || "Navigation";
+            document.getElementById('footer-site-name').textContent = config.site_title;
+
+            // 1. Header & Announcement
+            const headerHtml = `
+                <header class="text-center space-y-2 animate-fade-in">
+                    <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 tracking-tight">
+                        ${config.site_title}
+                    </h1>
+                    ${config.announcement ? `
+                        <div class="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-blue-200 text-sm flex items-start text-left">
+                            <span class="mr-2 text-lg">📢</span>
+                            <span>${config.announcement}</span>
+                        </div>
+                    ` : ''}
+                </header>
+            `;
+
+            // 2. Permanent URL Button
+            const permanentHtml = `
+                <div class="animate-fade-in" style="animation-delay: 0.1s">
+                    <a href="${config.permanent_url}" target="_blank" class="group relative block w-full">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-200"></div>
+                        <button class="relative w-full bg-gray-900 rounded-xl py-4 px-6 flex items-center justify-between border border-gray-700 group-hover:border-gray-500 transition-all">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">🚀</span>
+                                <div class="text-left">
+                                    <div class="text-white font-bold text-lg">Permanent Home</div>
+                                    <div class="text-gray-400 text-xs">Overseas / Official Domain</div>
+                                </div>
+                            </div>
+                            <svg class="w-6 h-6 text-gray-400 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </a>
+                </div>
+            `;
+
+            // 3. Contact Grid
+            let contactHtml = '';
+            if (config.contact_info && config.contact_info.length > 0) {
+                const buttons = config.contact_info.map(contact => {
+                    const iconSvg = ICONS[contact.icon] || ICONS.default;
+                    return `
+                        <a href="${contact.url}" target="_blank" class="flex flex-col items-center justify-center p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-gray-600 rounded-xl transition group">
+                            <div class="text-gray-400 group-hover:text-blue-400 mb-1 transition">${iconSvg}</div>
+                            <span class="text-xs text-gray-300 group-hover:text-white font-medium">${contact.label}</span>
+                        </a>
+                    `;
+                }).join('');
+                
+                contactHtml = `
+                    <div class="grid grid-cols-${Math.min(config.contact_info.length, 4)} gap-3 animate-fade-in" style="animation-delay: 0.2s">
+                        ${buttons}
+                    </div>
+                `;
+            }
+
+            // 4. Lines List Container
+            const linesHtml = `
+                <div class="space-y-3 animate-fade-in" style="animation-delay: 0.3s">
+                    <div class="flex items-center justify-between px-1">
+                        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Available Lines</h2>
+                        <span class="text-xs text-gray-600 flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>Auto-Sorting
+                        </span>
+                    </div>
+                    <div id="lines-container" class="space-y-3">
+                        ${config.lines.map((line, index) => createLineCard(line, index)).join('')}
+                    </div>
+                </div>
+            `;
+
+            app.innerHTML = headerHtml + permanentHtml + contactHtml + linesHtml;
+        }
+
+        function createLineCard(line, index) {
+            // Initial state: Loading
+            return `
+                <a href="${line.url}" target="_blank" id="line-${index}" data-url="${line.url}" class="block group transition-all duration-500 transform">
+                    <div class="relative overflow-hidden bg-gray-800 hover:bg-gray-750 border border-gray-700 hover:border-gray-600 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                        <div class="flex items-center space-x-3">
+                            <div id="status-dot-${index}" class="w-2.5 h-2.5 rounded-full bg-gray-600 animate-pulse"></div>
+                            <div>
+                                <div class="font-medium text-gray-200 group-hover:text-white transition">${line.name}</div>
+                                <div class="text-xs text-gray-500 font-mono mt-0.5 truncate max-w-[200px] opacity-70">${line.url}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span id="latency-${index}" class="text-xs font-mono text-gray-500">Testing...</span>
+                            <svg class="w-5 h-5 text-gray-600 group-hover:text-gray-300 -mr-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }
+
+        function startLatencyTests(lines) {
+            const container = document.getElementById('lines-container');
+            const results = lines.map((line, index) => ({
+                ...line,
+                id: index,
+                latency: Infinity
+            }));
+
+            let completedCount = 0;
+
+            results.forEach((line, index) => {
+                const startTime = Date.now();
+                const img = new Image();
+                const timeout = 5000; // 5s timeout
+
+                const finish = (isSuccess) => {
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    const finalLatency = isSuccess ? duration : Infinity;
+                    
+                    // Update Data
+                    results[index].latency = finalLatency;
+                    
+                    // Update UI
+                    updateLineUI(index, finalLatency, isSuccess);
+
+                    completedCount++;
+                    
+                    // Trigger sort if all done (or maybe incrementally? Incrementally is better for UX)
+                    // But standard sort jumps around. Let's sort after all are done OR every X items.
+                    // For smoothness, let's sort only when all are done.
+                    if (completedCount === results.length) {
+                        sortLines(results);
+                    }
+                };
+
+                img.onload = () => finish(true);
+                img.onerror = () => finish(false); // Favicon might not exist, but connection worked? 
+                // Actually, onerror often means network error OR 404. 
+                // For a "connection test", 404 is technically a success (server reached).
+                // However, without CORS, we can't distinguish 404 from Network Error easily in standard img tags 
+                // EXCEPT that 404 usually fires onload in some browsers or onerror in others depending on strictness.
+                // But for a mirror site, usually we want to see if it loads. 
+                // Let's treat onerror as "Slow/Error" for safety, OR assume if it returns fast it's alive.
+                // A better trick: fetch with mode 'no-cors'.
+                
+                // Let's stick to Image for simplicity as requested, but treat onerror as a potential success if it was fast?
+                // No, usually onerror on favicon means it failed to load image. 
+                // Let's try to be robust: if it fails fast, it might be a 404 (server up). 
+                // If it times out, it's down.
+                // For this demo, let's treat onerror as "Error" (Red) to be safe.
+                
+                img.src = `${line.url}/favicon.ico?t=${startTime}`;
+                
+                // Timeout fallback
+                setTimeout(() => {
+                    if (!img.complete) {
+                        img.src = ""; // Cancel
+                        finish(false);
+                    }
+                }, timeout);
+            });
+        }
+
+        function updateLineUI(index, latency, isSuccess) {
+            const latencyEl = document.getElementById(`latency-${index}`);
+            const dotEl = document.getElementById(`status-dot-${index}`);
+            
+            if (!isSuccess || latency === Infinity) {
+                latencyEl.textContent = "Timeout";
+                latencyEl.className = "text-xs font-bold text-red-500";
+                dotEl.className = "w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]";
+            } else {
+                latencyEl.textContent = `${latency}ms`;
+                if (latency < 200) {
+                    latencyEl.className = "text-xs font-bold text-green-400";
+                    dotEl.className = "w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
+                } else if (latency < 800) {
+                    latencyEl.className = "text-xs font-bold text-yellow-400";
+                    dotEl.className = "w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]";
+                } else {
+                    latencyEl.className = "text-xs font-bold text-red-400";
+                    dotEl.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+                }
+            }
+        }
+
+        function sortLines(results) {
+            const container = document.getElementById('lines-container');
+            
+            // Sort: Low latency first, Infinity last
+            const sorted = [...results].sort((a, b) => a.latency - b.latency);
+            
+            // Re-order DOM elements
+            // We can just appendChild in the new order, it moves them.
+            sorted.forEach(item => {
+                const el = document.getElementById(`line-${item.id}`);
+                if (el) {
+                    container.appendChild(el);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
