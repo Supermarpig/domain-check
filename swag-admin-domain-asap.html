@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWAG 配置管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #00d2be 0%, #00a896 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 210, 190, 0.3);
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #000;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #0a0a0a;
+            font-size: 0.95rem;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(0, 210, 190, 0.3);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: #00d2be;
+            background: rgba(0, 210, 190, 0.1);
+        }
+
+        .tab.active {
+            color: #00d2be;
+            border-bottom-color: #00d2be;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 210, 190, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .section h2 {
+            color: #00d2be;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .simple-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 210, 190, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .simple-input label {
+            display: block;
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .simple-input input,
+        .simple-input textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0a0a0a;
+            border: 2px solid rgba(0, 210, 190, 0.3);
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .simple-input textarea {
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .simple-input input:focus,
+        .simple-input textarea:focus {
+            outline: none;
+            border-color: #00d2be;
+            box-shadow: 0 0 15px rgba(0, 210, 190, 0.2);
+        }
+
+        .url-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 210, 190, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .url-item input {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 2px solid rgba(0, 210, 190, 0.3);
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s;
+        }
+
+        .url-item input:focus {
+            outline: none;
+            border-color: #00d2be;
+            box-shadow: 0 0 15px rgba(0, 210, 190, 0.2);
+        }
+
+        .url-item input.name-input {
+            margin-bottom: 8px;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .delete-btn {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid #ff4757;
+            color: #ff4757;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 71, 87, 0.3);
+            transform: scale(1.05);
+        }
+
+        .add-button {
+            background: rgba(0, 210, 190, 0.2);
+            border: 2px dashed rgba(0, 210, 190, 0.5);
+            color: #00d2be;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .add-button:hover {
+            background: rgba(0, 210, 190, 0.3);
+            border-color: #00d2be;
+        }
+
+        .save-bar {
+            position: sticky;
+            bottom: 0;
+            background: linear-gradient(to top, #1a1a1a 80%, transparent);
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 16px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, #00d2be 0%, #00a896 100%);
+            color: #000;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 210, 190, 0.4);
+        }
+
+        .status {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 500;
+            display: none;
+            text-align: center;
+        }
+
+        .status.success {
+            background: rgba(0, 210, 190, 0.2);
+            border: 1px solid #00d2be;
+            color: #00d2be;
+            display: block;
+        }
+
+        .status.error {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid #ff4757;
+            color: #ff4757;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ SWAG 配置管理</h1>
+            <p class="subtitle">簡易編輯模式 - 分頁瀏覽</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('basic')">📝 基本設定</button>
+            <button class="tab" onclick="switchTab('links')">🔗 固定連結</button>
+            <button class="tab" onclick="switchTab('lines')">🌐 線路列表</button>
+            <button class="tab" onclick="switchTab('contact')">📧 聯絡資訊</button>
+            <button class="tab" onclick="switchTab('app')">📱 APP 下載</button>
+        </div>
+
+        <!-- Tab: 基本設定 -->
+        <div id="tab-basic" class="tab-content active">
+            <div class="section">
+                <h2>基本設定</h2>
+                <div class="simple-input">
+                    <label>網站標題</label>
+                    <input type="text" id="site_title" placeholder="SWAG.LIVE">
+                </div>
+                <div class="simple-input">
+                    <label>主題顏色</label>
+                    <input type="text" id="theme_color" placeholder="#00d2be">
+                </div>
+                <div class="simple-input">
+                    <label>公告文字</label>
+                    <textarea id="announcement" placeholder="最新地址发布页..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: 固定連結 -->
+        <div id="tab-links" class="tab-content">
+            <div class="section">
+                <h2>固定連結</h2>
+                <div id="fixedLinksContainer"></div>
+                <button class="add-button" onclick="addFixedLink()">➕ 新增固定連結</button>
+            </div>
+        </div>
+
+        <!-- Tab: 線路列表 -->
+        <div id="tab-lines" class="tab-content">
+            <div class="section">
+                <h2>線路列表</h2>
+                <div id="linesContainer"></div>
+                <button class="add-button" onclick="addLine()">➕ 新增線路</button>
+            </div>
+        </div>
+
+        <!-- Tab: 聯絡資訊 -->
+        <div id="tab-contact" class="tab-content">
+            <div class="section">
+                <h2>聯絡資訊</h2>
+                <div class="simple-input">
+                    <label>Twitter 網址</label>
+                    <input type="text" id="twitter_url" placeholder="https://twitter.com/...">
+                </div>
+                <div class="simple-input">
+                    <label>Email</label>
+                    <input type="text" id="email_url" placeholder="mailto:contact@...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: APP 下載 -->
+        <div id="tab-app" class="tab-content">
+            <div class="section">
+                <h2>APP 下載</h2>
+                <div class="simple-input">
+                    <label>下載網址</label>
+                    <input type="text" id="app_url" placeholder="https://...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Save Bar -->
+        <div class="save-bar">
+            <button class="btn-save" onclick="saveConfig()">💾 儲存所有變更</button>
+            <div id="status" class="status"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let currentConfig = {};
+
+        document.addEventListener('DOMContentLoaded', loadConfig);
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function loadConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/config`);
+                const result = await response.json();
+
+                if (result.success) {
+                    currentConfig = result.data;
+                    populateForm(currentConfig);
+                    showStatus('✅ 配置載入成功', 'success');
+                } else {
+                    showStatus('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('❌ 載入失敗: ' + error.message, 'error');
+            }
+        }
+
+        function populateForm(config) {
+            document.getElementById('site_title').value = config.site_title || '';
+            document.getElementById('theme_color').value = config.theme_color || '';
+            document.getElementById('announcement').value = config.announcement || '';
+
+            renderFixedLinks();
+            renderLines();
+
+            const twitter = config.contact_info?.find(c => c.icon === 'twitter');
+            const email = config.contact_info?.find(c => c.icon === 'email');
+            document.getElementById('twitter_url').value = twitter?.url || '';
+            document.getElementById('email_url').value = email?.url || '';
+            document.getElementById('app_url').value = config.app_download?.url || '';
+        }
+
+        function renderFixedLinks() {
+            const container = document.getElementById('fixedLinksContainer');
+            container.innerHTML = '';
+            (currentConfig.fixed_links || []).forEach((link, index) => {
+                const div = document.createElement('div');
+                div.className = 'url-item';
+                div.innerHTML = `
+                    <div class="item-header">
+                        <label style="margin: 0; color: #00d2be; font-weight: 600;">固定連結 ${index + 1}</label>
+                        <button class="delete-btn" onclick="deleteFixedLink(${index})">🗑️ 刪除</button>
+                    </div>
+                    <input type="text" class="name-input" id="fixed_link_name_${index}" value="${link.name}" placeholder="連結名稱">
+                    <input type="text" id="fixed_link_url_${index}" value="${link.url}" placeholder="https://">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderLines() {
+            const container = document.getElementById('linesContainer');
+            container.innerHTML = '';
+            (currentConfig.lines || []).forEach((line, index) => {
+                const div = document.createElement('div');
+                div.className = 'url-item';
+                div.innerHTML = `
+                    <div class="item-header">
+                        <label style="margin: 0; color: #00d2be; font-weight: 600;">線路 ${index + 1}</label>
+                        <button class="delete-btn" onclick="deleteLine(${index})">🗑️ 刪除</button>
+                    </div>
+                    <input type="text" class="name-input" id="line_name_${index}" value="${line.name}" placeholder="線路名稱">
+                    <input type="text" id="line_url_${index}" value="${line.url}" placeholder="https://">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addFixedLink() {
+            if (!currentConfig.fixed_links) currentConfig.fixed_links = [];
+            currentConfig.fixed_links.push({ name: '新連結', url: '', highlight: false });
+            renderFixedLinks();
+            showStatus('✅ 已新增固定連結，記得儲存變更', 'success');
+        }
+
+        function deleteFixedLink(index) {
+            if (confirm('確定要刪除這個固定連結嗎？')) {
+                currentConfig.fixed_links.splice(index, 1);
+                renderFixedLinks();
+                showStatus('✅ 已刪除固定連結，記得儲存變更', 'success');
+            }
+        }
+
+        function addLine() {
+            if (!currentConfig.lines) currentConfig.lines = [];
+            currentConfig.lines.push({ name: '新線路', url: '' });
+            renderLines();
+            showStatus('✅ 已新增線路，記得儲存變更', 'success');
+        }
+
+        function deleteLine(index) {
+            if (confirm('確定要刪除這條線路嗎？')) {
+                currentConfig.lines.splice(index, 1);
+                renderLines();
+                showStatus('✅ 已刪除線路，記得儲存變更', 'success');
+            }
+        }
+
+        async function saveConfig() {
+            try {
+                const newConfig = {
+                    ...currentConfig,
+                    site_title: document.getElementById('site_title').value,
+                    theme_color: document.getElementById('theme_color').value,
+                    announcement: document.getElementById('announcement').value,
+                };
+
+                newConfig.fixed_links = currentConfig.fixed_links.map((link, index) => ({
+                    ...link,
+                    name: document.getElementById(`fixed_link_name_${index}`).value,
+                    url: document.getElementById(`fixed_link_url_${index}`).value
+                }));
+
+                newConfig.lines = currentConfig.lines.map((line, index) => ({
+                    ...line,
+                    name: document.getElementById(`line_name_${index}`).value,
+                    url: document.getElementById(`line_url_${index}`).value
+                }));
+
+                newConfig.contact_info = currentConfig.contact_info.map(contact => {
+                    if (contact.icon === 'twitter') return { ...contact, url: document.getElementById('twitter_url').value };
+                    if (contact.icon === 'email') return { ...contact, url: document.getElementById('email_url').value };
+                    return contact;
+                });
+
+                newConfig.app_download = {
+                    ...currentConfig.app_download,
+                    url: document.getElementById('app_url').value
+                };
+
+                const response = await fetch(`${API_BASE}/config`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newConfig)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentConfig = newConfig;
+                    showStatus('✅ 配置儲存成功！', 'success');
+                } else {
+                    showStatus('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('❌ 儲存失敗: ' + error.message, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            setTimeout(() => statusEl.className = 'status', 5000);
+        }
+    </script>
+</body>
+
+</html>

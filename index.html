@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Navigation Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -10,19 +11,34 @@
             theme: {
                 extend: {
                     colors: {
-                        gray: {
-                            850: '#1f2937',
-                            900: '#111827',
-                            950: '#0b0f19',
-                        }
+                        'theme-primary': '#00d2be',
+                        'theme-dark': '#00a896',
+                        'dark-bg': '#050505',
+                        'panel-bg': '#111111',
+                        'neon-red': '#FF003C',
+                    },
+                    fontFamily: {
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'scan': 'scan 4s linear infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'float': 'float 3s ease-in-out infinite',
                     },
                     keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        scan: {
+                            '0%': { backgroundPosition: '0 -100vh' },
+                            '100%': { backgroundPosition: '0 100vh' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(0, 210, 190, 0.2)' },
+                            '100%': { boxShadow: '0 0 20px rgba(0, 210, 190, 0.6), 0 0 10px rgba(0, 210, 190, 0.4)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
                         }
                     }
                 }
@@ -31,44 +47,110 @@
     </script>
     <style>
         body {
-            background-color: #0b0f19; /* Deep dark background */
+            background-color: #050505;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
-        .glass-panel {
-            background: rgba(31, 41, 55, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+
+        /* Scanline Effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+            background-size: 100% 4px;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        /* Background Grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Marquee */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(-100%, 0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00d2be;
         }
     </style>
 </head>
-<body class="text-gray-100 font-sans antialiased min-h-screen flex flex-col items-center">
+
+<body class="min-h-screen flex flex-col items-center selection:bg-theme-primary selection:text-black">
+
+    <div class="scanlines"></div>
+    <div class="bg-grid"></div>
 
     <!-- Main Container -->
-    <div id="app" class="w-full max-w-lg px-4 py-8 flex-grow flex flex-col space-y-6">
-        
-        <!-- Loading Skeleton -->
-        <div id="loading" class="flex flex-col items-center justify-center py-20 space-y-4">
-            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-gray-400 animate-pulse">Loading configuration...</p>
+    <div id="app" class="w-full max-w-md px-4 py-8 flex-grow flex flex-col space-y-8 relative z-10">
+
+        <!-- Loading -->
+        <div id="loading" class="flex flex-col items-center justify-center py-40 space-y-6">
+            <div class="font-mono text-theme-primary text-2xl animate-pulse tracking-widest">SYSTEM_INITIALIZING...
+            </div>
+            <div class="w-64 h-1 bg-gray-800 rounded-full overflow-hidden relative">
+                <div class="absolute top-0 left-0 h-full bg-theme-primary animate-[width_1.5s_ease-in-out_infinite] shadow-[0_0_10px_#00d2be]"
+                    style="width: 50%"></div>
+            </div>
         </div>
 
     </div>
 
     <!-- Footer -->
-    <footer class="w-full py-6 text-center text-gray-500 text-xs">
-        <p>&copy; <span id="year"></span> <span id="footer-site-name">Dashboard</span>. All rights reserved.</p>
-        <p class="mt-2">Press <kbd class="bg-gray-800 px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 font-mono">Ctrl+D</kbd> to bookmark</p>
+    <footer
+        class="w-full py-8 text-center text-gray-600 text-xs font-mono uppercase tracking-widest relative z-10 opacity-60 hover:opacity-100 transition-opacity">
+        <p>&copy; <span id="year"></span> <span id="footer-site-name">SYSTEM</span></p>
     </footer>
 
     <script>
-        // --- Icons (Simple SVG strings) ---
-        const ICONS = {
-            telegram: `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.743.025.956.956 0 0 0-.534.277l-8.8 8.8a.959.959 0 0 0 0 1.356l8.8 8.8a.959.959 0 0 0 1.356-1.356L4.66 12.959h16.38a.959.959 0 1 0 0-1.918H4.66l7.397-7.397a.959.959 0 0 0 0-1.356.959.959 0 0 0-.113-.288z" transform="scale(-1,1) translate(-24,0)"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-2.06-1.35-2.06-1.35s-.7-.48.02-1.13c.18-.16 3.32-3.04 3.38-3.16.01-.02.01-.09-.03-.13-.04-.04-.1-.03-.14 0-.06.05-2.26 1.44-6.4 4.23-.6.41-1.15.43-1.68.27-.6-.18-1.74-.56-1.74-.56s-.65-.26.44-.68c2.6-1.12 6.13-2.38 8.78-3.46 2.65-1.08 3.19-1.28 3.54-1.28.08 0 .25.02.36.11.09.08.12.19.13.27 0 .02.01.07 0 .12z"/></svg>`,
-            email: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>`,
-            twitter: `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>`,
-            default: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>`
-        };
-
-        // --- Main Logic ---
         document.addEventListener('DOMContentLoaded', init);
 
         async function init() {
@@ -80,18 +162,22 @@
                 const response = await fetch('./config.json');
                 if (!response.ok) throw new Error(`Config load failed: ${response.status}`);
                 const config = await response.json();
-                
+
+                // Apply theme color from config if present, otherwise default
+                if (config.theme_color) {
+                    document.documentElement.style.setProperty('--theme-primary', config.theme_color);
+                }
+
                 renderDashboard(config);
                 startLatencyTests(config.lines);
 
             } catch (error) {
                 console.error(error);
                 app.innerHTML = `
-                    <div class="glass-panel p-8 rounded-2xl text-center border-red-500/30 border">
-                        <div class="text-red-500 text-5xl mb-4">⚠️</div>
-                        <h1 class="text-2xl font-bold text-white mb-2">Configuration Error</h1>
-                        <p class="text-gray-400 mb-6">Unable to load the site configuration.</p>
-                        <button onclick="location.reload()" class="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Retry</button>
+                    <div class="bg-panel-bg border border-neon-red p-8 text-center rounded-lg shadow-[0_0_30px_rgba(255,0,60,0.2)] animate-pulse">
+                        <div class="text-neon-red text-6xl mb-4 font-mono">ERROR</div>
+                        <h1 class="text-xl font-bold text-white mb-4 uppercase tracking-widest">System Failure</h1>
+                        <button onclick="location.reload()" class="px-8 py-3 bg-neon-red hover:bg-red-600 text-white font-bold uppercase tracking-widest transition-all transform hover:scale-105 shadow-lg">Reboot System</button>
                     </div>
                 `;
             }
@@ -102,101 +188,165 @@
             document.title = config.site_title || "Navigation";
             document.getElementById('footer-site-name').textContent = config.site_title;
 
-            // 1. Header & Announcement
+            // 1. Header
+            let headerContent = '';
+            if (config.logo_url) {
+                headerContent = `<img src="${config.logo_url}" alt="${config.site_title}" class="w-full max-w-[280px] mx-auto mb-6 animate-float drop-shadow-[0_0_20px_rgba(0,210,190,0.4)]">`;
+            } else {
+                headerContent = `<h1 class="text-5xl font-black text-theme-primary uppercase tracking-tight text-center mb-6 animate-float drop-shadow-[0_0_15px_rgba(0,210,190,0.5)]">${config.site_title}</h1>`;
+            }
+
             const headerHtml = `
-                <header class="text-center space-y-2 animate-fade-in">
-                    <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 tracking-tight">
-                        ${config.site_title}
-                    </h1>
+                <header class="text-center space-y-4 mb-6">
+                    ${headerContent}
                     ${config.announcement ? `
-                        <div class="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-blue-200 text-sm flex items-start text-left">
-                            <span class="mr-2 text-lg">📢</span>
-                            <span>${config.announcement}</span>
+                        <div class="w-full bg-theme-primary/5 border-y border-theme-primary/30 overflow-hidden py-3 relative">
+                            <div class="marquee-container">
+                                <div class="marquee-content font-mono text-theme-primary text-xs font-semibold tracking-wide">
+                                    📢 ${config.announcement} &nbsp;&nbsp;&nbsp;///&nbsp;&nbsp;&nbsp; 📢 ${config.announcement} &nbsp;&nbsp;&nbsp;///&nbsp;&nbsp;&nbsp; 📢 ${config.announcement}
+                                </div>
+                            </div>
                         </div>
                     ` : ''}
                 </header>
             `;
 
-            // 2. Permanent URL Button
-            const permanentHtml = `
-                <div class="animate-fade-in" style="animation-delay: 0.1s">
-                    <a href="${config.permanent_url}" target="_blank" class="group relative block w-full">
-                        <div class="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-200"></div>
-                        <button class="relative w-full bg-gray-900 rounded-xl py-4 px-6 flex items-center justify-between border border-gray-700 group-hover:border-gray-500 transition-all">
-                            <div class="flex items-center space-x-3">
-                                <span class="text-2xl">🚀</span>
-                                <div class="text-left">
-                                    <div class="text-white font-bold text-lg">Permanent Home</div>
-                                    <div class="text-gray-400 text-xs">Overseas / Official Domain</div>
+            // 2. Fixed Links
+            let fixedLinksHtml = '';
+            if (config.fixed_links) {
+                fixedLinksHtml = `
+                    <div id="fixed-links" class="space-y-4 animate-[fadeIn_0.5s_ease-out]">
+                        <div class="flex items-center space-x-2 mb-2 px-1">
+                            <div class="w-1 h-4 bg-theme-primary shadow-[0_0_8px_#00d2be]"></div>
+                            <h2 class="text-white font-bold text-sm uppercase tracking-widest">Permanent Access</h2>
+                        </div>
+                        ${config.fixed_links.map(link => `
+                            <a href="${link.url}" target="_blank" class="block group relative">
+                                <div class="absolute -inset-0.5 bg-gradient-to-r from-theme-primary to-theme-dark rounded-lg blur opacity-20 group-hover:opacity-75 transition duration-500 group-hover:duration-200"></div>
+                                <div class="relative bg-gray-900 border border-gray-800 ${link.highlight ? 'border-theme-primary/50' : ''} p-4 rounded-lg flex justify-between items-center transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-[0_10px_20px_-10px_rgba(0,210,190,0.3)]">
+                                    <div class="flex items-center space-x-3">
+                                        <span class="w-2 h-2 rounded-full ${link.highlight ? 'bg-theme-primary animate-pulse' : 'bg-gray-600 group-hover:bg-theme-primary'} transition-colors"></span>
+                                        <span class="font-bold text-gray-100 group-hover:text-theme-primary transition-colors text-lg">${link.name}</span>
+                                    </div>
+                                    <span class="text-xs font-mono text-gray-500 group-hover:text-white transition-colors border border-gray-700 rounded px-2 py-1 group-hover:border-theme-primary/50">OPEN &rarr;</span>
                                 </div>
-                            </div>
-                            <svg class="w-6 h-6 text-gray-400 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        </button>
-                    </a>
-                </div>
-            `;
-
-            // 3. Contact Grid
-            let contactHtml = '';
-            if (config.contact_info && config.contact_info.length > 0) {
-                const buttons = config.contact_info.map(contact => {
-                    const iconSvg = ICONS[contact.icon] || ICONS.default;
-                    return `
-                        <a href="${contact.url}" target="_blank" class="flex flex-col items-center justify-center p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-gray-600 rounded-xl transition group">
-                            <div class="text-gray-400 group-hover:text-blue-400 mb-1 transition">${iconSvg}</div>
-                            <span class="text-xs text-gray-300 group-hover:text-white font-medium">${contact.label}</span>
-                        </a>
-                    `;
-                }).join('');
-                
-                contactHtml = `
-                    <div class="grid grid-cols-${Math.min(config.contact_info.length, 4)} gap-3 animate-fade-in" style="animation-delay: 0.2s">
-                        ${buttons}
+                            </a>
+                        `).join('')}
                     </div>
                 `;
             }
 
-            // 4. Lines List Container
+            // 3. Domestic Lines
             const linesHtml = `
-                <div class="space-y-3 animate-fade-in" style="animation-delay: 0.3s">
-                    <div class="flex items-center justify-between px-1">
-                        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Available Lines</h2>
-                        <span class="text-xs text-gray-600 flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>Auto-Sorting
-                        </span>
+                <div id="lines-container" class="space-y-4 animate-[fadeIn_0.7s_ease-out]">
+                    <div class="flex items-center space-x-2 mb-2 px-1 mt-8">
+                        <div class="w-1 h-4 bg-theme-primary shadow-[0_0_8px_#00d2be]"></div>
+                        <h2 class="text-white font-bold text-sm uppercase tracking-widest">Speed Test Lines</h2>
                     </div>
-                    <div id="lines-container" class="space-y-3">
-                        ${config.lines.map((line, index) => createLineCard(line, index)).join('')}
-                    </div>
+                    ${config.lines.map((line, index) => createLineCard(line, index)).join('')}
                 </div>
             `;
 
-            app.innerHTML = headerHtml + permanentHtml + contactHtml + linesHtml;
+            // 3.5 App Download
+            let appDownloadHtml = '';
+            if (config.app_download) {
+                appDownloadHtml = `
+                    <div id="app-download" class="mt-8 animate-[fadeIn_0.8s_ease-out]">
+                        <a href="${config.app_download.url}" target="_blank" class="block group">
+                            <div class="relative overflow-hidden rounded-xl border border-theme-primary/30 bg-gray-900/50 p-6 text-center transition-all duration-300 group-hover:border-theme-primary group-hover:shadow-[0_0_20px_rgba(0,210,190,0.2)] group-hover:-translate-y-1">
+                                <div class="absolute inset-0 bg-theme-primary/5 group-hover:bg-theme-primary/10 transition-colors duration-300"></div>
+                                
+                                <div class="relative z-10 flex flex-col items-center">
+                                    <div class="mb-3 text-theme-primary group-hover:scale-110 transition-transform duration-300">
+                                        ${getIcon('download')}
+                                    </div>
+                                    <h3 class="text-xl font-bold text-white mb-1 group-hover:text-theme-primary transition-colors">${config.app_download.title}</h3>
+                                    <p class="text-xs text-gray-400 mb-4 font-mono">${config.app_download.description}</p>
+                                    
+                                    <div class="inline-flex items-center space-x-2 px-6 py-2 bg-theme-primary/10 group-hover:bg-theme-primary text-gray-300 group-hover:text-black font-bold rounded-lg transition-all duration-300 border border-theme-primary/50 group-hover:border-theme-primary">
+                                        <span class="text-sm">立即下载</span>
+                                        <span class="text-xs">→</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                `;
+            }
+
+            // 4. Contact Info
+            let contactHtml = '';
+            if (config.contact_info) {
+                contactHtml = `
+                    <div id="contact-info" class="grid grid-cols-2 gap-4 mt-8 animate-[fadeIn_0.9s_ease-out]">
+                        ${config.contact_info.map(contact => `
+                            <a href="${contact.url}" target="_blank" class="group relative overflow-hidden rounded-lg">
+                                <div class="absolute inset-0 bg-gray-800/50 group-hover:bg-theme-primary/10 transition-colors duration-300"></div>
+                                <div class="relative border border-gray-800 group-hover:border-theme-primary/50 p-4 flex flex-col items-center justify-center space-y-2 transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(0,210,190,0.1)]">
+                                    <div class="text-gray-400 group-hover:text-theme-primary transition-colors transform group-hover:scale-110 duration-300">
+                                        ${getIcon(contact.icon)}
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-400 group-hover:text-white uppercase tracking-wider">${contact.label}</span>
+                                </div>
+                            </a>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // 5. Bottom Promo
+            let bottomPromoHtml = '';
+            if (config.bottom_promo && config.bottom_promo.image) {
+                bottomPromoHtml = `
+                    <div class="w-full mt-8 animate-[fadeIn_1.1s_ease-out]">
+                        <a href="${config.bottom_promo.url}" target="_blank" class="block relative group overflow-hidden rounded-xl border border-gray-800 hover:border-theme-primary/50 transition-all duration-300">
+                            <div class="absolute inset-0 bg-theme-primary/0 group-hover:bg-theme-primary/10 z-10 transition-colors duration-300"></div>
+                            <img src="${config.bottom_promo.image}" alt="Promo" class="w-full h-auto block opacity-80 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-105">
+                        </a>
+                    </div>
+                `;
+            }
+
+            app.innerHTML = headerHtml + fixedLinksHtml + linesHtml + appDownloadHtml + contactHtml + bottomPromoHtml;
         }
 
         function createLineCard(line, index) {
-            // Initial state: Loading
             return `
-                <a href="${line.url}" target="_blank" id="line-${index}" data-url="${line.url}" class="block group transition-all duration-500 transform">
-                    <div class="relative overflow-hidden bg-gray-800 hover:bg-gray-750 border border-gray-700 hover:border-gray-600 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
-                        <div class="flex items-center space-x-3">
-                            <div id="status-dot-${index}" class="w-2.5 h-2.5 rounded-full bg-gray-600 animate-pulse"></div>
-                            <div>
-                                <div class="font-medium text-gray-200 group-hover:text-white transition">${line.name}</div>
-                                <div class="text-xs text-gray-500 font-mono mt-0.5 truncate max-w-[200px] opacity-70">${line.url}</div>
-                            </div>
+                <a href="${line.url}" target="_blank" id="line-${index}" data-url="${line.url}" class="block group relative">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg blur opacity-0 group-hover:opacity-50 transition duration-500"></div>
+                    <div class="relative bg-panel-bg border border-gray-800 group-hover:border-theme-primary/30 p-4 rounded-lg transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-xl">
+                        <!-- Status Dot -->
+                        <div id="status-dot-${index}" class="absolute top-4 right-4 w-2 h-2 bg-gray-700 rounded-full transition-colors duration-300"></div>
+                        
+                        <!-- Content -->
+                        <div class="relative z-10 pr-8">
+                            <p class="text-base font-bold text-gray-200 mb-1 group-hover:text-theme-primary transition-colors">${line.name}</p>
+                            <p class="text-xs font-mono text-gray-500 truncate group-hover:text-gray-300 transition-colors">${line.url}</p>
                         </div>
-                        <div class="flex items-center space-x-3">
-                            <span id="latency-${index}" class="text-xs font-mono text-gray-500">Testing...</span>
-                            <svg class="w-5 h-5 text-gray-600 group-hover:text-gray-300 -mr-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </div>
+
+                        <!-- Latency Display -->
+                        <div id="latency-${index}" class="absolute bottom-4 right-4 text-[10px] font-mono text-gray-600 font-bold transition-colors duration-300">PINGING...</div>
+                        
+                        <!-- Progress Bar (Visual Flair) -->
+                        <div class="absolute bottom-0 left-0 h-[2px] bg-theme-primary/0 group-hover:bg-theme-primary/50 w-full transition-all duration-500 transform scale-x-0 group-hover:scale-x-100 origin-left"></div>
                     </div>
                 </a>
             `;
         }
 
+        function getIcon(name) {
+            const size = "w-6 h-6";
+            const icons = {
+                email: `<svg xmlns="http://www.w3.org/2000/svg" class="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
+                twitter: `<svg xmlns="http://www.w3.org/2000/svg" class="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>`,
+                telegram: `<svg xmlns="http://www.w3.org/2000/svg" class="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>`,
+                download: `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+                default: `<svg xmlns="http://www.w3.org/2000/svg" class="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
+            };
+            return icons[name] || icons.default;
+        }
+
         function startLatencyTests(lines) {
-            const container = document.getElementById('lines-container');
             const results = lines.map((line, index) => ({
                 ...line,
                 id: index,
@@ -208,51 +358,31 @@
             results.forEach((line, index) => {
                 const startTime = Date.now();
                 const img = new Image();
-                const timeout = 5000; // 5s timeout
+                const timeout = 5000;
 
                 const finish = (isSuccess) => {
                     const endTime = Date.now();
                     const duration = endTime - startTime;
                     const finalLatency = isSuccess ? duration : Infinity;
-                    
-                    // Update Data
+
                     results[index].latency = finalLatency;
-                    
-                    // Update UI
                     updateLineUI(index, finalLatency, isSuccess);
 
                     completedCount++;
-                    
-                    // Trigger sort if all done (or maybe incrementally? Incrementally is better for UX)
-                    // But standard sort jumps around. Let's sort after all are done OR every X items.
-                    // For smoothness, let's sort only when all are done.
                     if (completedCount === results.length) {
                         sortLines(results);
                     }
                 };
 
                 img.onload = () => finish(true);
-                img.onerror = () => finish(false); // Favicon might not exist, but connection worked? 
-                // Actually, onerror often means network error OR 404. 
-                // For a "connection test", 404 is technically a success (server reached).
-                // However, without CORS, we can't distinguish 404 from Network Error easily in standard img tags 
-                // EXCEPT that 404 usually fires onload in some browsers or onerror in others depending on strictness.
-                // But for a mirror site, usually we want to see if it loads. 
-                // Let's treat onerror as "Slow/Error" for safety, OR assume if it returns fast it's alive.
-                // A better trick: fetch with mode 'no-cors'.
-                
-                // Let's stick to Image for simplicity as requested, but treat onerror as a potential success if it was fast?
-                // No, usually onerror on favicon means it failed to load image. 
-                // Let's try to be robust: if it fails fast, it might be a 404 (server up). 
-                // If it times out, it's down.
-                // For this demo, let's treat onerror as "Error" (Red) to be safe.
-                
+                img.onerror = () => finish(false);
+
+                // Add random param to avoid cache
                 img.src = `${line.url}/favicon.ico?t=${startTime}`;
-                
-                // Timeout fallback
+
                 setTimeout(() => {
                     if (!img.complete) {
-                        img.src = ""; // Cancel
+                        img.src = "";
                         finish(false);
                     }
                 }, timeout);
@@ -262,34 +392,30 @@
         function updateLineUI(index, latency, isSuccess) {
             const latencyEl = document.getElementById(`latency-${index}`);
             const dotEl = document.getElementById(`status-dot-${index}`);
-            
+
             if (!isSuccess || latency === Infinity) {
-                latencyEl.textContent = "Timeout";
-                latencyEl.className = "text-xs font-bold text-red-500";
-                dotEl.className = "w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]";
+                latencyEl.textContent = "TIMEOUT";
+                latencyEl.className = "absolute bottom-4 right-4 text-[10px] font-mono text-neon-red font-bold";
+                dotEl.className = "absolute top-4 right-4 w-2 h-2 bg-neon-red animate-pulse shadow-[0_0_8px_#FF003C]";
             } else {
                 latencyEl.textContent = `${latency}ms`;
                 if (latency < 200) {
-                    latencyEl.className = "text-xs font-bold text-green-400";
-                    dotEl.className = "w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
+                    latencyEl.className = "absolute bottom-4 right-4 text-[10px] font-mono text-green-500 font-bold";
+                    dotEl.className = "absolute top-4 right-4 w-2 h-2 bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]";
                 } else if (latency < 800) {
-                    latencyEl.className = "text-xs font-bold text-yellow-400";
-                    dotEl.className = "w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]";
+                    latencyEl.className = "absolute bottom-4 right-4 text-[10px] font-mono text-yellow-500 font-bold";
+                    dotEl.className = "absolute top-4 right-4 w-2 h-2 bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]";
                 } else {
-                    latencyEl.className = "text-xs font-bold text-red-400";
-                    dotEl.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+                    latencyEl.className = "absolute bottom-4 right-4 text-[10px] font-mono text-neon-red font-bold";
+                    dotEl.className = "absolute top-4 right-4 w-2 h-2 bg-neon-red shadow-[0_0_8px_#FF003C]";
                 }
             }
         }
 
         function sortLines(results) {
             const container = document.getElementById('lines-container');
-            
-            // Sort: Low latency first, Infinity last
             const sorted = [...results].sort((a, b) => a.latency - b.latency);
-            
-            // Re-order DOM elements
-            // We can just appendChild in the new order, it moves them.
+
             sorted.forEach(item => {
                 const el = document.getElementById(`line-${item.id}`);
                 if (el) {
@@ -299,4 +425,5 @@
         }
     </script>
 </body>
+
 </html>

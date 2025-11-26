@@ -1,44 +1,53 @@
 {
-    "site_title": "SpeedNav Dashboard",
-    "announcement": "📢 System Notice: Domain list updated on 2025-11-27. Please press Ctrl+D to bookmark this page.",
-    "permanent_url": "https://www.google.com",
-    "contact_info": [
+    "site_title": "SWAG.LIVE",
+    "theme_color": "#00d2be",
+    "logo_url": "",
+    "announcement": "最新地址发布页，请按 Ctrl+D 收藏本页。如果域名被墙，请使用海外入口。",
+    "fixed_links": [
         {
-            "label": "Telegram Group",
-            "url": "#",
-            "icon": "telegram"
+            "name": "回家的路",
+            "url": "https://heiliao.com/archives/39668/",
+            "highlight": true
         },
         {
-            "label": "Support Email",
-            "url": "mailto:admin@example.com",
-            "icon": "email"
+            "name": "黑料网海外入口",
+            "url": "https://heiliao.com/"
         },
         {
-            "label": "Twitter",
-            "url": "#",
-            "icon": "twitter"
+            "name": "黑料网海外中转",
+            "url": "https://www.heiliao88.com/"
         }
     ],
     "lines": [
         {
-            "name": "Fast Line 01 (Google)",
-            "url": "https://www.google.com"
+            "name": "黑料网-线路一",
+            "url": "https://m2u43.hwcbqlkb.cc/"
         },
         {
-            "name": "Fast Line 02 (Cloudflare)",
-            "url": "https://www.cloudflare.com"
-        },
-        {
-            "name": "Asia Optimized (Baidu)",
-            "url": "https://www.baidu.com"
-        },
-        {
-            "name": "Backup Line 01 (Bing)",
-            "url": "https://www.bing.com"
-        },
-        {
-            "name": "Dead Line (Test)",
-            "url": "https://www.this-domain-does-not-exist-12345.com"
+            "name": "黑料网-线路二 (备用)",
+            "url": "https://m2u43.hwcbqlkb.cc/"
         }
-    ]
+    ],
+    "contact_info": [
+        {
+            "label": "Twitter",
+            "url": "https://twitter.com/swag_live",
+            "icon": "twitter"
+        },
+        {
+            "label": "Email",
+            "url": "mailto:contact@swag.live",
+            "icon": "email"
+        }
+    ],
+    "app_download": {
+        "title": "下载官方APP",
+        "description": "永不迷路，畅享高清",
+        "url": "https://sw.agtheapp.com",
+        "icon": "download"
+    },
+    "bottom_promo": {
+        "image": "https://placehold.co/600x100/111/00d2be?text=ADS+HERE",
+        "url": "#"
+    }
 }
