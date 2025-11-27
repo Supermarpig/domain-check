@@ -60,7 +60,7 @@ app.get('/api/config/:section', (req, res) => {
   try {
     const config = readConfig();
     const section = req.params.section;
-    
+
     if (config.hasOwnProperty(section)) {
       res.json({
         success: true,
@@ -84,7 +84,7 @@ app.get('/api/config/:section', (req, res) => {
 app.put('/api/config', (req, res) => {
   try {
     const newConfig = req.body;
-    
+
     // Validate that it's a valid object
     if (!newConfig || typeof newConfig !== 'object') {
       return res.status(400).json({
@@ -92,7 +92,7 @@ app.put('/api/config', (req, res) => {
         error: 'Invalid config data'
       });
     }
-    
+
     writeConfig(newConfig);
     res.json({
       success: true,
@@ -113,17 +113,17 @@ app.patch('/api/config/:section', (req, res) => {
     const config = readConfig();
     const section = req.params.section;
     const newData = req.body;
-    
+
     if (!config.hasOwnProperty(section)) {
       return res.status(404).json({
         success: false,
         error: `Section '${section}' not found`
       });
     }
-    
+
     config[section] = newData;
     writeConfig(config);
-    
+
     res.json({
       success: true,
       message: `Section '${section}' updated successfully`,
@@ -143,9 +143,9 @@ app.post('/api/config/backup', (req, res) => {
     const config = readConfig();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupFile = path.join(BACKUP_DIR, `config-backup-${timestamp}.json`);
-    
+
     fs.writeFileSync(backupFile, JSON.stringify(config, null, 4), 'utf8');
-    
+
     res.json({
       success: true,
       message: 'Backup created successfully',
@@ -169,7 +169,7 @@ app.get('/api/backups', (req, res) => {
         created: fs.statSync(path.join(BACKUP_DIR, file)).mtime
       }))
       .sort((a, b) => b.created - a.created);
-    
+
     res.json({
       success: true,
       data: files
@@ -187,19 +187,19 @@ app.post('/api/config/restore/:filename', (req, res) => {
   try {
     const filename = req.params.filename;
     const backupFile = path.join(BACKUP_DIR, filename);
-    
+
     if (!fs.existsSync(backupFile)) {
       return res.status(404).json({
         success: false,
         error: 'Backup file not found'
       });
     }
-    
+
     const backupData = fs.readFileSync(backupFile, 'utf8');
     const config = JSON.parse(backupData);
-    
+
     writeConfig(config);
-    
+
     res.json({
       success: true,
       message: 'Config restored from backup successfully',
